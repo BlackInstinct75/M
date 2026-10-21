@@ -1,0 +1,14 @@
+# Secretos
+.env
+.env.*
+!.env.example
+
+# Python
+__pycache__/
+*.pyc
+venv/
+.venv/
+
+# Node / Vite
+node_modules/
+dist/

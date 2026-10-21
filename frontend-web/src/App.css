@@ -182,3 +182,29 @@
     border-right-color: var(--border);
   }
 }
+.markdown p {
+  margin: 5px 0 0 0;
+}
+
+.markdown ul,
+.markdown ol {
+  margin: 5px 0 0 0;
+  padding-left: 20px;
+}
+
+.markdown li {
+  margin: 2px 0;
+}
+
+.markdown code {
+  background: rgba(0, 0, 0, 0.08);
+  padding: 2px 5px;
+  border-radius: 4px;
+}
+
+.markdown pre {
+  background: rgba(0, 0, 0, 0.08);
+  padding: 10px;
+  border-radius: 8px;
+  overflow-x: auto;
+}

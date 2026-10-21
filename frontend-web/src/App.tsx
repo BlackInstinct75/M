@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
+import ReactMarkdown from 'react-markdown';
 import './App.css'; // O tus estilos si usas Tailwind
 
 // Definimos la estructura de un mensaje
@@ -107,7 +108,13 @@ function App() {
             }}
           >
             <strong>{msg.sender === 'user' ? 'Tú' : 'IA'}:</strong>
-            <p style={{ margin: '5px 0 0 0', whiteSpace: 'pre-wrap' }}>{msg.text}</p>
+            {msg.sender === 'assistant' ? (
+              <div className="markdown">
+                <ReactMarkdown>{msg.text}</ReactMarkdown>
+              </div>
+            ) : (
+              <p style={{ margin: '5px 0 0 0', whiteSpace: 'pre-wrap' }}>{msg.text}</p>
+            )}
           </div>
         ))}
 
