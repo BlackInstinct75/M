@@ -1,14 +1,36 @@
-# Secretos
+# =========================================
+# GENERAL Y SECRETOS
+# =========================================
 .env
 .env.*
 !.env.example
+.DS_Store
+Thumbs.db
 
-# Python
-__pycache__/
+
+# =========================================
+# BACKEND (Python / FastAPI)
+# =========================================
+backend/__pycache__/
+backend/venv/
+backend/.venv/
 *.pyc
-venv/
-.venv/
 
-# Node / Vite
-node_modules/
-dist/
+
+# =========================================
+# FRONTEND-WEB (Node.js / Vite)
+# =========================================
+frontend-web/node_modules/
+frontend-web/dist/
+frontend-web/.vite/
+
+
+# =========================================
+# ANDROID APP (Android Studio / Gradle)
+# =========================================
+android_app/.gradle/
+android_app/build/
+android_app/app/build/
+android_app/.idea/
+android_app/local.properties
+android_app/*.iml   

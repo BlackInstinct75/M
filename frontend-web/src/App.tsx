@@ -79,18 +79,18 @@ function App() {
   };
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', height: '100vh', maxWidth: '800px', margin: '0 auto', padding: '20px', fontFamily: 'sans-serif' }}>
+    <div style={{ display: 'flex', flexDirection: 'column', width: '35%', margin: '0 auto', padding: '20px', fontFamily: 'sans-serif' }}>
       
       {/* Cabecera */}
       <header style={{ borderBottom: '1px solid #ccc', paddingBottom: '10px', marginBottom: '20px' }}>
-        <h2>Mi Chat IA</h2>
+        <h2>M</h2>
       </header>
 
       {/* Ventana de mensajes (con scroll) */}
       <div style={{ flex: 1, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '12px', paddingRight: '10px' }}>
         {messages.length === 0 && (
           <p style={{ color: '#888', textAlign: 'center', marginTop: '40px' }}>
-            Escribe un mensaje abajo para empezar a chatear...
+            Escribeme lo que piensa
           </p>
         )}
 
@@ -126,23 +126,46 @@ function App() {
         <div ref={messagesEndRef} />
       </div>
 
-      {/* Input inferior para escribir */}
-      <form onSubmit={handleSubmit} style={{ display: 'flex', gap: '10px', marginTop: '20px' }}>
-        <input
-          type="text"
-          value={input}
-          onChange={(e) => setInput(e.target.value)}
-          placeholder="Escribe tu mensaje..."
-          style={{ flex: 1, padding: '12px', borderRadius: '8px', border: '1px solid #ccc', fontSize: '16px' }}
-          disabled={isLoading}
-        />
-        <button
-          type="submit"
-          disabled={isLoading || !input.trim()}
-          style={{ padding: '0 20px', borderRadius: '8px', border: 'none', backgroundColor: '#007bff', color: '#fff', cursor: 'pointer', fontWeight: 'bold' }}
-        >
-          Enviar
-        </button>
+      {/* Input inferior con el botón dentro */}
+      <form onSubmit={handleSubmit} style={{ marginTop: '20px' }}>
+        <div style={{ position: 'relative', display: 'flex', alignItems: 'center', width: '100%', margin: "90% 0 5% 0" }}>
+          <input
+            type="text"
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+            placeholder="Escribe tu mensaje..."
+            style={{
+              width: '100%',
+              padding: '14px 95px 14px 14px', /* 95px de espacio a la derecha para que el texto no tape el botón */
+              borderRadius: '8px',
+              border: '1px solid var(--border, #ccc)',
+              fontSize: '16px',
+              outline: 'none',
+              backgroundColor: 'var(--bg, #fff)',
+              color: 'var(--text-h, #000)',
+              boxSizing: 'border-box'
+            }}
+            disabled={isLoading}
+          />
+          <button
+            type="submit"
+            disabled={isLoading || !input.trim()}
+            style={{
+              position: 'absolute',
+              right: '8px',
+              padding: '8px 16px',
+              borderRadius: '6px',
+              border: 'none',
+              backgroundColor: 'var(--accent, #007bff)',
+              color: '#fff',
+              cursor: 'pointer',
+              fontWeight: 'bold',
+              fontSize: '14px'
+            }}
+          >
+            Enviar
+          </button>
+        </div>
       </form>
     </div>
   );
