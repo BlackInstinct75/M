@@ -1,4 +1,4 @@
-package com.example.chatai
+package com.example.android_app
 
 import android.os.Bundle
 import androidx.activity.ComponentActivity
