@@ -20,3 +20,9 @@ Sistema de chat con Inteligencia Artificial estructurado bajo una arquitectura d
 ├── backend/              # Servidor API REST (FastAPI y lógica de IA)
 ├── frontend-web/         # Aplicación de interfaz web (React + Vite)
 └── README.md             # Documentación principal del monorepo
+
+ollama run llama3
+
+uvicorn main:app --host 0.0.0.0 --port 3000 --reload
+
+npm run dev

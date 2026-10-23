@@ -1,64 +1,53 @@
-import os
-import traceback
-
-import openai
-from openai import OpenAI
-from dotenv import load_dotenv
-from fastapi import FastAPI, HTTPException
+import httpx
+from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from pydantic import BaseModel
-
-load_dotenv()
 
 app = FastAPI()
 
+# Permitir conexiones desde tu web y app móvil
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173"],
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-# Mismo SDK de OpenAI, apuntando a xAI. max_retries: reintentos automáticos ante 429/5xx
-client = OpenAI(
-    api_key=os.environ.get("XAI_API_KEY"),
-    base_url="https://api.x.ai/v1",
-    max_retries=3,
-)
-
-MODEL = os.environ.get("XAI_MODEL", "grok-4-6")
-
-SYSTEM_PROMPT = "Eres un asistente útil. Responde en el idioma del usuario."
-
-
-class ChatRequest(BaseModel):
-    message: str
-
 
 @app.post("/api/chat")
-def chat_endpoint(body: ChatRequest):
-    try:
-        completion = client.chat.completions.create(
-            model=MODEL,
-            messages=[
-                {"role": "system", "content": SYSTEM_PROMPT},
-                {"role": "user", "content": body.message},
-            ],
-            max_tokens=2048,
-        )
-        reply = completion.choices[0].message.content or "Sin respuesta"
-        return {"reply": reply.strip()}
+async def chat_with_local_ai(data: dict):
+  user_message = data.get("message", "")
 
-    except openai.AuthenticationError:
-        raise HTTPException(status_code=401, detail="Clave de xAI no válida. Revisa tu .env.")
-    except openai.NotFoundError:
-        raise HTTPException(status_code=404, detail=f"El modelo '{MODEL}' no existe o no tienes acceso.")
-    except openai.RateLimitError as e:
-        print("429 de xAI:", e)
-        raise HTTPException(status_code=429, detail=str(e))
-    except (openai.APIConnectionError, openai.InternalServerError):
-        raise HTTPException(status_code=503, detail="xAI no está disponible ahora mismo. Inténtalo en unos segundos.")
+  # Petición al servidor local de Ollama
+  async with httpx.AsyncClient() as client:
+    try:
+      response = await client.post(
+          "http://localhost:11434/api/chat",
+          json={
+              "model": (  # Asegúrate de tener este modelo descargado (ej: ollama pull llama3)
+                  "llama3"
+              ),
+              "messages": [{"role": "user", "content": user_message}],
+              "stream": (  # False para recibir la respuesta completa de golpe
+                  False
+              ),
+          },
+          timeout=60.0,
+      )
+
+      if response.status_code != 200:
+        return {"reply": "⚠️ Error al comunicarse con Ollama local."}
+
+      result = response.json()
+      # Extraemos la respuesta del modelo
+      ai_reply = result.get("message", {}).get("content", "Sin respuesta")
+
+      return {"reply": ai_reply}
+
     except Exception as e:
-        traceback.print_exc()
-        raise HTTPException(status_code=500, detail=str(e))
+      print(f"Error de conexión: {e}")
+      return {
+          "reply": (
+              "⚠️ No se pudo conectar con el servidor local de Ollama."
+          )
+      }

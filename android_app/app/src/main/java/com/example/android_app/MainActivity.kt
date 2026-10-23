@@ -3,7 +3,6 @@ package com.example.android_app
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -23,6 +22,7 @@ import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.RequestBody.Companion.toRequestBody
 import org.json.JSONObject
+import java.util.concurrent.TimeUnit
 
 data class Message(val id: String, val sender: String, val text: String)
 
@@ -30,11 +30,22 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            Surface(
-                modifier = Modifier.fillMaxSize(),
-                color = MaterialTheme.colorScheme.background
-            ) {
-                ChatScreen()
+            // Definimos un esquema de colores totalmente oscuro (negro)
+            val darkColors = darkColorScheme(
+                primary = Color(0xFF3B82F6),
+                background = Color.Black,
+                surface = Color(0xFF121212),
+                onBackground = Color.White,
+                onSurface = Color.White
+            )
+
+            MaterialTheme(colorScheme = darkColors) {
+                Surface(
+                    modifier = Modifier.fillMaxSize(),
+                    color = MaterialTheme.colorScheme.background
+                ) {
+                    ChatScreen()
+                }
             }
         }
     }
@@ -48,19 +59,24 @@ fun ChatScreen() {
     var isLoading by remember { mutableStateOf(false) }
     val coroutineScope = rememberCoroutineScope()
 
+    // systemBarsPadding protege la cámara y la barra inferior del sistema
+    // imePadding empuja toda la interfaz hacia arriba cuando aparece el teclado
     Column(
         modifier = Modifier
             .fillMaxSize()
+            .systemBarsPadding()
+            .imePadding()
             .padding(16.dp)
     ) {
-        // Cabecera
+        // Cabecera minimalista
         Text(
-            text = "Mi Chat IA Nativo",
-            fontSize = 20.sp,
+            text = "M",
+            fontSize = 24.sp,
+            color = Color.White,
             modifier = Modifier.padding(bottom = 12.dp)
         )
 
-        // Lista de mensajes (equivalente al scroll de React)
+        // Lista de mensajes con scroll
         LazyColumn(
             modifier = Modifier
                 .weight(1f)
@@ -75,12 +91,13 @@ fun ChatScreen() {
                 ) {
                     Surface(
                         shape = RoundedCornerShape(12.dp),
-                        color = if (isUser) MaterialTheme.colorScheme.primary else Color.LightGray,
+                        // Azul para ti, gris muy oscuro para la IA
+                        color = if (isUser) Color(0xFF2563EB) else Color(0xFF27272A),
                         modifier = Modifier.widthIn(max = 280.dp)
                     ) {
                         Text(
                             text = msg.text,
-                            color = if (isUser) Color.White else Color.Black,
+                            color = Color.White,
                             modifier = Modifier.padding(12.dp)
                         )
                     }
@@ -93,7 +110,7 @@ fun ChatScreen() {
             }
         }
 
-        // Fila inferior de input y botón
+        // Fila inferior fija de input y botón
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -103,7 +120,14 @@ fun ChatScreen() {
             OutlinedTextField(
                 value = input,
                 onValueChange = { input = it },
-                placeholder = { Text("Escribe un mensaje...") },
+                placeholder = { Text("Escribe un mensaje...", color = Color.Gray) },
+                colors = OutlinedTextFieldDefaults.colors(
+                    focusedBorderColor = Color(0xFF3B82F6),
+                    unfocusedBorderColor = Color(0xFF4B5563),
+                    focusedTextColor = Color.White,
+                    unfocusedTextColor = Color.White,
+                    cursorColor = Color(0xFF3B82F6)
+                ),
                 modifier = Modifier
                     .weight(1f)
                     .padding(end = 8.dp)
@@ -117,7 +141,6 @@ fun ChatScreen() {
                         input = ""
                         isLoading = true
 
-                        // Llamada a tu API de FastAPI en segundo plano
                         coroutineScope.launch {
                             val reply = sendToFastAPI(userText)
                             val aiMsg = Message((System.currentTimeMillis() + 1).toString(), "assistant", reply)
@@ -126,37 +149,42 @@ fun ChatScreen() {
                         }
                     }
                 },
-                enabled = !isLoading
+                enabled = !isLoading,
+                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF2563EB))
             ) {
-                Text("Enviar")
+                Text("Enviar", color = Color.White)
             }
         }
     }
 }
 
-// Función HTTP para conectar con FastAPI
+// Función HTTP con timeout de 60s apuntando a tu red local
 suspend fun sendToFastAPI(message: String): String {
     return withContext(Dispatchers.IO) {
         try {
-            val client = OkHttpClient()
+            val client = OkHttpClient.Builder()
+                .connectTimeout(60, TimeUnit.SECONDS)
+                .readTimeout(60, TimeUnit.SECONDS)
+                .writeTimeout(60, TimeUnit.SECONDS)
+                .build()
+
             val json = JSONObject().put("message", message).toString()
             val body = json.toRequestBody("application/json; charset=utf-8".toMediaType())
-            
-            // ⚠️ NOTA: Si usas el emulador de Android, 'localhost' se escribe como '10.0.2.2'
+
             val request = Request.Builder()
-                .url("http://10.0.2.2:3000/api/chat")
+                .url("http://192.168.0.49:3000/api/chat")
                 .post(body)
                 .build()
 
             client.newCall(request).execute().use { response ->
-                if (!response.isSuccessful) return@withContext "Error del servidor"
+                if (!response.isSuccessful) return@withContext "Error del servidor: ${response.code}"
                 val responseBody = response.body?.string() ?: ""
                 val jsonObject = JSONObject(responseBody)
                 return@withContext jsonObject.optString("reply", "Respuesta vacía")
             }
         } catch (e: Exception) {
             e.printStackTrace()
-            "⚠️ Error de conexión con FastAPI: ${e.localizedMessage}"
+            "⚠️ Error de timeout o conexión con FastAPI: ${e.localizedMessage}"
         }
     }
 }

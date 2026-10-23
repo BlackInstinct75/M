@@ -43,7 +43,6 @@ function App() {
 
     try {
       // 2. AQUÍ CONECTAS CON TU BACKEND (Node.js)
-      // Ejemplo apuntando a tu servidor local en el puerto 3000:
       const response = await fetch('http://localhost:3000/api/chat', {
         method: 'POST',
         headers: {
@@ -59,7 +58,7 @@ function App() {
       const aiMessage: Message = {
         id: (Date.now() + 1).toString(),
         sender: 'assistant',
-        text: data.reply, // Asegúrate de que tu backend devuelva un objeto con la propiedad .reply
+        text: data.reply,
       };
 
       // 3. Añadimos la respuesta de la IA
@@ -79,18 +78,35 @@ function App() {
   };
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', width: '35%', margin: '0 auto', padding: '20px', fontFamily: 'sans-serif' }}>
+    <div style={{ 
+      display: 'flex', 
+      flexDirection: 'column', 
+      height: '100vh',          
+      width: '35%', 
+      margin: '0 auto', 
+      padding: '20px', 
+      boxSizing: 'border-box',  
+      fontFamily: 'sans-serif' 
+    }}>
       
       {/* Cabecera */}
-      <header style={{ borderBottom: '1px solid #ccc', paddingBottom: '10px', marginBottom: '20px' }}>
+      <header style={{ borderBottom: '1px solid #ccc', paddingBottom: '10px', marginBottom: '20px', flexShrink: 0 }}>
         <h2>M</h2>
       </header>
 
-      {/* Ventana de mensajes (con scroll) */}
-      <div style={{ flex: 1, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '12px', paddingRight: '10px' }}>
+      {/* Ventana de mensajes (con scroll y minHeight: 0 para que funcione el flex scroll) */}
+      <div style={{ 
+        flex: 1, 
+        minHeight: 0,          
+        overflowY: 'auto', 
+        display: 'flex', 
+        flexDirection: 'column', 
+        gap: '12px', 
+        paddingRight: '10px' 
+      }}>
         {messages.length === 0 && (
           <p style={{ color: '#888', textAlign: 'center', marginTop: '40px' }}>
-            Escribeme lo que piensa
+            Escríbeme lo que piensas
           </p>
         )}
 
@@ -126,9 +142,9 @@ function App() {
         <div ref={messagesEndRef} />
       </div>
 
-      {/* Input inferior con el botón dentro */}
-      <form onSubmit={handleSubmit} style={{ marginTop: '20px' }}>
-        <div style={{ position: 'relative', display: 'flex', alignItems: 'center', width: '100%', margin: "90% 0 5% 0" }}>
+      {/* Input inferior fijo (flexShrink: 0 evita que se aplaste) */}
+      <form onSubmit={handleSubmit} style={{ marginTop: '20px', flexShrink: 0 }}>
+        <div style={{ position: 'relative', display: 'flex', alignItems: 'center', width: '100%' }}>
           <input
             type="text"
             value={input}
@@ -136,7 +152,7 @@ function App() {
             placeholder="Escribe tu mensaje..."
             style={{
               width: '100%',
-              padding: '14px 95px 14px 14px', /* 95px de espacio a la derecha para que el texto no tape el botón */
+              padding: '14px 95px 14px 14px',
               borderRadius: '8px',
               border: '1px solid var(--border, #ccc)',
               fontSize: '16px',
