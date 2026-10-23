@@ -1,0 +1,19 @@
+version: '3.8'
+
+services:
+  backend:
+    build: ./backend
+    network_mode: host  # 👈 Comparte la red del host directamente (adiós problemas con Ollama)
+    ports:
+      - "3000:3000"
+    extra_hosts:
+      - "host.docker.internal:host-gateway" # Permite al contenedor comunicarse con Ollama en tu PC
+    restart: always
+
+  frontend:
+    build: ./frontend-web
+    ports:
+      - "8080:80" # Tu web estará accesible en http://localhost:8080
+    depends_on:
+      - backend
+    restart: always
