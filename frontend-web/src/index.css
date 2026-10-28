@@ -55,7 +55,6 @@
   flex-direction: column;
   box-sizing: border-box;
   background-color: var(--bg);
-  padding: 20px;
 }
 
 body {

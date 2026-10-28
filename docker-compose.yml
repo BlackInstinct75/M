@@ -3,11 +3,10 @@ version: '3.8'
 services:
   backend:
     build: ./backend
-    network_mode: host  # 👈 Comparte la red del host directamente (adiós problemas con Ollama)
     ports:
-      - "3000:3000"
+      - "3000:3000" # Exponemos el puerto 3000 al exterior de forma limpia
     extra_hosts:
-      - "host.docker.internal:host-gateway" # Permite al contenedor comunicarse con Ollama en tu PC
+      - "host.docker.internal:host-gateway" # Permite al backend hablar con Windows
     restart: always
 
   frontend:

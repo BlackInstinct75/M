@@ -132,7 +132,7 @@ function App() {
             }}
           >
             <div style={{ fontSize: '11px', color: msg.sender === 'user' ? '#a7f3d0' : '#6b7280', marginBottom: '4px', fontWeight: 'bold', fontFamily: 'monospace' }}>
-              {msg.sender === 'user' ? 'USUARIO' : 'DOOM_AI'}
+              {msg.sender === 'user' ? 'USUARIO' : 'AI'}
             </div>
             {msg.sender === 'assistant' ? (
               <div className="markdown">
@@ -156,7 +156,7 @@ function App() {
             alignItems: 'center',
             gap: '8px'
           }}>
-            <span style={{ fontSize: '11px', color: '#6b7280', fontWeight: 'bold', fontFamily: 'monospace' }}>DOOM_AI:</span>
+            <span style={{ fontSize: '11px', color: '#6b7280', fontWeight: 'bold', fontFamily: 'monospace' }}>AI:</span>
             <div className="typing-dots" style={{ display: 'flex', gap: '4px', alignItems: 'center', height: '15px' }}>
               <span>•</span>
               <span>•</span>

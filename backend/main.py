@@ -16,38 +16,33 @@ app.add_middleware(
 
 @app.post("/api/chat")
 async def chat_with_local_ai(data: dict):
-  user_message = data.get("message", "")
+    user_message = data.get("message", "")
 
-  # Petición al servidor local de Ollama
-  async with httpx.AsyncClient() as client:
-    try:
-      response = await client.post(
-          "http://localhost:11434/api/chat",
-          json={
-              "model": (  # Asegúrate de tener este modelo descargado (ej: ollama pull llama3)
-                  "llama3"
-              ),
-              "messages": [{"role": "user", "content": user_message}],
-              "stream": (  # False para recibir la respuesta completa de golpe
-                  False
-              ),
-          },
-          timeout=60.0,
-      )
+    # Petición al servidor local de Ollama (Usando /api/chat que admite "messages")
+    async with httpx.AsyncClient() as client:
+        try:
+            response = await client.post(
+                "http://host.docker.internal:11434/api/chat",
+                json={
+                    "model": "llama3",  # Asegúrate de tenerlo con: ollama pull llama3
+                    "messages": [{"role": "user", "content": user_message}],
+                    "stream": False,  # False para recibir la respuesta completa de golpe
+                },
+                timeout=60.0,
+            )
 
-      if response.status_code != 200:
-        return {"reply": "⚠️ Error al comunicarse con Ollama local."}
+            if response.status_code != 200:
+                return {"reply": f"⚠️ Error al comunicarse con Ollama: {response.text}"}
 
-      result = response.json()
-      # Extraemos la respuesta del modelo
-      ai_reply = result.get("message", {}).get("content", "Sin respuesta")
+            result = response.json()
+            
+            # 💡 CORRECCIÓN CLAVE: En /api/chat la estructura es result["message"]["content"]
+            ai_reply = result.get("message", {}).get("content", "Sin respuesta")
 
-      return {"reply": ai_reply}
+            return {"reply": ai_reply}
 
-    except Exception as e:
-      print(f"Error de conexión: {e}")
-      return {
-          "reply": (
-              "⚠️ No se pudo conectar con el servidor local de Ollama."
-          )
-      }
+        except Exception as e:
+            print(f"Error de conexión: {e}")
+            return {
+                "reply": "⚠️ No se pudo conectar con el servidor local de Ollama."
+            }
